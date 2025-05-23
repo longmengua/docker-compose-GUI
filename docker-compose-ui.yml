@@ -9,7 +9,6 @@ services:
       - "5540:5540"
     volumes:
       - redisinsight_data:/db
-
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
@@ -20,7 +19,6 @@ services:
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka1:19093,kafka2:19094,kafka3:19095
     volumes:
       - kafka_data:/db
-
 volumes:
   kafka_data:
   redisinsight_data:

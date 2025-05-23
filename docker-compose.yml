@@ -73,7 +73,7 @@ services:
     ]
     volumes:
       - redis-node3-data:/data
-
+      
   redis-cluster-init:
     image: redis:7
     container_name: redis-cluster-init
@@ -90,6 +90,8 @@ services:
       redis-node3:6381
       --cluster-replicas 0
       && tail -f /dev/null"
+    volumes:
+      - redis-cluster-data:/data
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
@@ -97,6 +99,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper_data:/data
 
   kafka1:
     image: confluentinc/cp-kafka:7.5.0
@@ -111,6 +115,8 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:19093
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - kafka1_data:/data
 
   kafka2:
     image: confluentinc/cp-kafka:7.5.0
@@ -125,6 +131,8 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:19094
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19094
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - kafka2_data:/data
 
   kafka3:
     image: confluentinc/cp-kafka:7.5.0
@@ -139,10 +147,14 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:19095
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19095
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    volumes:
+      - kafka3_data:/data
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
     container_name: elasticsearch
+    ports:
+      - "9200:9200"
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -155,8 +167,6 @@ services:
         hard: -1
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
 
 volumes:
   mysql_data:
@@ -165,4 +175,9 @@ volumes:
   redis-node1-data:
   redis-node2-data:
   redis-node3-data:
+  zookeeper_data:
+  redis-cluster-data:
+  kafka1_data:
+  kafka2_data:
+  kafka3_data:
   elasticsearch_data:
