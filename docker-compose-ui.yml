@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    container_name: redisinsight
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight_data:/db
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8080:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local-kafka
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka1:19093,kafka2:19094,kafka3:19095
+    volumes:
+      - kafka_data:/db
+
+volumes:
+  kafka_data:
+  redisinsight_data:

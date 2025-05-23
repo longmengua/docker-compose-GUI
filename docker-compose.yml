@@ -1,59 +1,168 @@
-#
+version: '3.8'
+
 services:
-  # mysql:
-  #   image: mysql:8
-  #   container_name: mysql
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: root
-  #     MYSQL_DATABASE: testdb
-  #   ports:
-  #     - "3306:3306"
-  #   volumes:
-  #     - mysql_data:/var/lib/mysql
-
-  # mongo:
-  #   image: mongo:6
-  #   container_name: mongo
-  #   ports:
-  #     - "27017:27017"
-  #   volumes:
-  #     - mongo_data:/data/db
-
-  # redis:
-  #   image: redis:7
-  #   container_name: redis
-  #   ports:
-  #     - "6379:6379"
-  #   volumes:
-  #     - redis_data:/data
-
-  redisinsight:
-    image: redislabs/redisinsight:latest
-    container_name: redisinsight
-    ports:
-      - "5540:5540"
-    volumes:
-      - redisinsight_data:/db
-
-  metabase:
-    image: metabase/metabase
-    container_name: metabase
-    ports:
-      - "3000:3000"
+  mysql:
+    image: mysql:8
+    container_name: mysql
     environment:
-      MB_DB_FILE: /metabase-data/metabase.db
-    volumes:
-      - metabase_data:/metabase-data
-
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: testdb
     ports:
-      - "8080:8080"
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis-node1:
+    image: redis:7
+    container_name: redis-node1
+    ports:
+      - "6379:6379"
+    command: [
+      "redis-server",
+      "--port", "6379",
+      "--cluster-enabled", "yes",
+      "--cluster-config-file", "nodes.conf",
+      "--cluster-node-timeout", "5000",
+      "--appendonly", "yes",
+      "--maxmemory", "512mb",
+      "--maxmemory-policy", "allkeys-lru"
+    ]
+    volumes:
+      - redis-node1-data:/data
+
+  redis-node2:
+    image: redis:7
+    container_name: redis-node2
+    ports:
+      - "6380:6380"
+    command: [
+      "redis-server",
+      "--port", "6380",
+      "--cluster-enabled", "yes",
+      "--cluster-config-file", "nodes.conf",
+      "--cluster-node-timeout", "5000",
+      "--appendonly", "yes",
+      "--maxmemory", "512mb",
+      "--maxmemory-policy", "allkeys-lru"
+    ]
+    volumes:
+      - redis-node2-data:/data
+
+  redis-node3:
+    image: redis:7
+    container_name: redis-node3
+    ports:
+      - "6381:6381"
+    command: [
+      "redis-server",
+      "--port", "6381",
+      "--cluster-enabled", "yes",
+      "--cluster-config-file", "nodes.conf",
+      "--cluster-node-timeout", "5000",
+      "--appendonly", "yes",
+      "--maxmemory", "512mb",
+      "--maxmemory-policy", "allkeys-lru"
+    ]
+    volumes:
+      - redis-node3-data:/data
+
+  redis-cluster-init:
+    image: redis:7
+    container_name: redis-cluster-init
+    depends_on:
+      - redis-node1
+      - redis-node2
+      - redis-node3
+    entrypoint: >
+      sh -c "
+      sleep 10 &&
+      echo yes | redis-cli --cluster create
+      redis-node1:6379
+      redis-node2:6380
+      redis-node3:6381
+      --cluster-replicas 0
+      && tail -f /dev/null"
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka1:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka1
+    ports:
+      - "19093:19093"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:19093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  kafka2:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka2
+    ports:
+      - "19094:19094"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:19094
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19094
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  kafka3:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka3
+    ports:
+      - "19095:19095"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:19095
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19095
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
 
 volumes:
-  # mysql_data:
-  # mongo_data:
-  # redis_data:
-  redisinsight_data:
-  metabase_data:
+  mysql_data:
+  mongo_data:
+  redis_data:
+  redis-node1-data:
+  redis-node2-data:
+  redis-node3-data:
+  elasticsearch_data:
