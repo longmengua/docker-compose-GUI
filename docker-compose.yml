@@ -20,79 +20,6 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  redis-node1:
-    image: redis:7
-    container_name: redis-node1
-    ports:
-      - "6379:6379"
-    command: [
-      "redis-server",
-      "--port", "6379",
-      "--cluster-enabled", "yes",
-      "--cluster-config-file", "nodes.conf",
-      "--cluster-node-timeout", "5000",
-      "--appendonly", "yes",
-      "--maxmemory", "512mb",
-      "--maxmemory-policy", "allkeys-lru"
-    ]
-    volumes:
-      - redis-node1-data:/data
-
-  redis-node2:
-    image: redis:7
-    container_name: redis-node2
-    ports:
-      - "6380:6380"
-    command: [
-      "redis-server",
-      "--port", "6380",
-      "--cluster-enabled", "yes",
-      "--cluster-config-file", "nodes.conf",
-      "--cluster-node-timeout", "5000",
-      "--appendonly", "yes",
-      "--maxmemory", "512mb",
-      "--maxmemory-policy", "allkeys-lru"
-    ]
-    volumes:
-      - redis-node2-data:/data
-
-  redis-node3:
-    image: redis:7
-    container_name: redis-node3
-    ports:
-      - "6381:6381"
-    command: [
-      "redis-server",
-      "--port", "6381",
-      "--cluster-enabled", "yes",
-      "--cluster-config-file", "nodes.conf",
-      "--cluster-node-timeout", "5000",
-      "--appendonly", "yes",
-      "--maxmemory", "512mb",
-      "--maxmemory-policy", "allkeys-lru"
-    ]
-    volumes:
-      - redis-node3-data:/data
-      
-  redis-cluster-init:
-    image: redis:7
-    container_name: redis-cluster-init
-    depends_on:
-      - redis-node1
-      - redis-node2
-      - redis-node3
-    entrypoint: >
-      sh -c "
-      sleep 10 &&
-      echo yes | redis-cli --cluster create
-      redis-node1:6379
-      redis-node2:6380
-      redis-node3:6381
-      --cluster-replicas 0
-      && tail -f /dev/null"
-    volumes:
-      - redis-cluster-data:/data
-
   zookeeper:
     image: confluentinc/cp-zookeeper
     container_name: zookeeper
@@ -101,11 +28,13 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     volumes:
       - zookeeper_data:/data
+
   kafka1:
     image: confluentinc/cp-kafka
     container_name: kafka1
     ports:
       - "19093:19093"
+      - "29093:29093"
     depends_on:
       - zookeeper
     environment:
@@ -113,7 +42,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19093,PLAINTEXT_HOST://0.0.0.0:29093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:19093,PLAINTEXT_HOST://localhost:19093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:19093,PLAINTEXT_HOST://localhost:29093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     volumes:
       - kafka1_data:/data
@@ -123,6 +52,7 @@ services:
     container_name: kafka2
     ports:
       - "19094:19094"
+      - "29094:29094"
     depends_on:
       - zookeeper
     environment:
@@ -130,7 +60,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19094,PLAINTEXT_HOST://0.0.0.0:29094
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:19094,PLAINTEXT_HOST://localhost:19094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:19094,PLAINTEXT_HOST://localhost:29094
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     volumes:
       - kafka2_data:/data
@@ -140,6 +70,7 @@ services:
     container_name: kafka3
     ports:
       - "19095:19095"
+      - "29095:29095"
     depends_on:
       - zookeeper
     environment:
@@ -147,7 +78,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19095,PLAINTEXT_HOST://0.0.0.0:29095
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:19095,PLAINTEXT_HOST://localhost:19095
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:19095,PLAINTEXT_HOST://localhost:29095
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     volumes:
       - kafka3_data:/data
@@ -173,12 +104,7 @@ services:
 volumes:
   mysql_data:
   mongo_data:
-  redis_data:
-  redis-node1-data:
-  redis-node2-data:
-  redis-node3-data:
   zookeeper_data:
-  redis-cluster-data:
   kafka1_data:
   kafka2_data:
   kafka3_data:
