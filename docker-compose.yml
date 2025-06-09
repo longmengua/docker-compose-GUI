@@ -105,11 +105,14 @@ services:
     image: redis:7
     container_name: redis-node1
     ports:
-      - "6379:6379"  # ✅ 改為公開給其他 container 可用
+      - "6379:6379" 
+      - "16379:16379"
     command:
       - redis-server
       - "--port"
       - "6379"
+      - "--bind"
+      - "0.0.0.0"
       - "--cluster-enabled"
       - "yes"
       - "--cluster-config-file"
@@ -123,7 +126,7 @@ services:
       - "--maxmemory-policy"
       - "allkeys-lru"
       - "--cluster-announce-ip"
-      - "redis-node1"
+      - "host.docker.internal"
       - "--cluster-announce-port"
       - "6379"
       - "--cluster-announce-bus-port"
@@ -136,10 +139,13 @@ services:
     container_name: redis-node2
     ports:
       - "6380:6380"
+      - "16380:16380"
     command:
       - redis-server
       - "--port"
       - "6380"
+      - "--bind"
+      - "0.0.0.0"
       - "--cluster-enabled"
       - "yes"
       - "--cluster-config-file"
@@ -153,7 +159,7 @@ services:
       - "--maxmemory-policy"
       - "allkeys-lru"
       - "--cluster-announce-ip"
-      - "redis-node2"
+      - "host.docker.internal"
       - "--cluster-announce-port"
       - "6380"
       - "--cluster-announce-bus-port"
@@ -166,10 +172,13 @@ services:
     container_name: redis-node3
     ports:
       - "6381:6381"
+      - "16381:16381"
     command:
       - redis-server
       - "--port"
       - "6381"
+      - "--bind"
+      - "0.0.0.0"
       - "--cluster-enabled"
       - "yes"
       - "--cluster-config-file"
@@ -183,7 +192,7 @@ services:
       - "--maxmemory-policy"
       - "allkeys-lru"
       - "--cluster-announce-ip"
-      - "redis-node3"
+      - "host.docker.internal"
       - "--cluster-announce-port"
       - "6381"
       - "--cluster-announce-bus-port"
