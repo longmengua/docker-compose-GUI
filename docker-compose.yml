@@ -105,7 +105,7 @@ services:
     image: redis:7
     container_name: redis-node1
     ports:
-      - "127.0.0.1:6379:6379"    # 僅本機訪問
+      - "6379:6379"  # ✅ 改為公開給其他 container 可用
     command:
       - redis-server
       - "--port"
@@ -200,17 +200,10 @@ services:
       - redis-node3
     entrypoint: >
       sh -c "
-      for hostport in redis-node1:6379 redis-node2:6380 redis-node3:6381; do
-        until redis-cli -h $(echo $hostport | cut -d: -f1) -p $(echo $hostport | cut -d: -f2) ping; do
-          echo Waiting for $hostport to be ready...
-          sleep 1
-        done
-      done
-      echo yes | redis-cli --cluster create redis-node1:6379 redis-node2:6380 redis-node3:6381 --cluster-replicas 0
-      && tail -f /dev/null
+      sleep 15 &&
+      echo yes | redis-cli --cluster create redis-node1:6379 redis-node2:6380 redis-node3:6381 --cluster-replicas 0 &&
+      tail -f /dev/null
       "
-    networks:
-      - default
 
 volumes:
   mysql_data:
