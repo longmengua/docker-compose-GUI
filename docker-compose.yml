@@ -94,16 +94,15 @@ services:
       - redis-cluster-data:/data
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
+    image: confluentinc/cp-zookeeper
     container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     volumes:
       - zookeeper_data:/data
-
   kafka1:
-    image: confluentinc/cp-kafka:7.5.0
+    image: confluentinc/cp-kafka
     container_name: kafka1
     ports:
       - "19093:19093"
@@ -112,14 +111,15 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:19093, PLAINTEXT_HOST://localhost:19093
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19093,PLAINTEXT_HOST://0.0.0.0:29093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:19093,PLAINTEXT_HOST://localhost:19093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     volumes:
       - kafka1_data:/data
 
   kafka2:
-    image: confluentinc/cp-kafka:7.5.0
+    image: confluentinc/cp-kafka
     container_name: kafka2
     ports:
       - "19094:19094"
@@ -128,14 +128,15 @@ services:
     environment:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:19094, PLAINTEXT_HOST://localhost:19094
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19094,PLAINTEXT_HOST://0.0.0.0:29094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:19094,PLAINTEXT_HOST://localhost:19094
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     volumes:
       - kafka2_data:/data
 
   kafka3:
-    image: confluentinc/cp-kafka:7.5.0
+    image: confluentinc/cp-kafka
     container_name: kafka3
     ports:
       - "19095:19095"
@@ -144,8 +145,9 @@ services:
     environment:
       KAFKA_BROKER_ID: 3
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:19095, PLAINTEXT_HOST://localhost:19095
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19095
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19095,PLAINTEXT_HOST://0.0.0.0:29095
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:19095,PLAINTEXT_HOST://localhost:19095
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
     volumes:
       - kafka3_data:/data
