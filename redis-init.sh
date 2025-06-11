@@ -23,7 +23,8 @@ echo "redis-node3: $ip3"
 
 # 建立 cluster（不帶複本）
 echo "建立 Redis Cluster..."
-echo yes | docker run --rm redis:7 redis-cli --cluster create \
-  ${ip1}:6379 ${ip2}:6379 ${ip3}:6379 --cluster-replicas 0
+
+echo "redis-cli --cluster create $ip1:6379 $ip2:6379 $ip3:6379 --cluster-replicas 0"
+docker exec redis-node1 redis-cli --cluster create $ip1:6379 $ip2:6379 $ip3:6379 --cluster-replicas 0
 
 echo "Redis Cluster 已建立"

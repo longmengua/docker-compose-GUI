@@ -1,111 +1,113 @@
 version: '3.8'
-
 services:
-  mysql:
-    image: mysql:8
-    container_name: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: testdb
+  redis-master:
+    image: redis:7.0
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    container_name: redis-master
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000
     ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-  mongo:
-    image: mongo:6
-    container_name: mongo
+      - "6379:6379"
+    networks:
+      - yt-net
+  redis-2:
+    image: redis:7.0
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    container_name: redis-2
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000
     ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper
-    container_name: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    volumes:
-      - zookeeper_data:/data
-
-  kafka1:
-    image: confluentinc/cp-kafka
-    container_name: kafka1
+      - "7002:6379"
+    networks:
+      - yt-net
+  redis-3:
+    image: redis:7.0
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    container_name: redis-3
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000
     ports:
-      - "19093:19093"
-      - "29093:29093"
+      - "7003:6379"
+    networks:
+      - yt-net
+  redis-4:
+    image: redis:7.0
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    container_name: redis-4
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000
+    ports:
+      - "7004:6379"
+    networks:
+      - yt-net
+  redis-5:
+    image: redis:7.0
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    container_name: redis-5
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000
+    ports:
+      - "7005:6379"
+    networks:
+      - yt-net
+  redis-6:
+    image: redis:7.0
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+        reservations:
+          cpus: '0.1'
+          memory: 64M
+    container_name: redis-6
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000
+    ports:
+      - "7006:6379"
+    networks:
+      - yt-net
+  redis-cluster-creator:
+    image: redis:7.0
+    container_name: redis-cluster-creator
     depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19093,PLAINTEXT_HOST://0.0.0.0:29093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:19093,PLAINTEXT_HOST://localhost:29093
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    volumes:
-      - kafka1_data:/data
-
-  kafka2:
-    image: confluentinc/cp-kafka
-    container_name: kafka2
-    ports:
-      - "19094:19094"
-      - "29094:29094"
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 2
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19094,PLAINTEXT_HOST://0.0.0.0:29094
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:19094,PLAINTEXT_HOST://localhost:29094
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    volumes:
-      - kafka2_data:/data
-
-  kafka3:
-    image: confluentinc/cp-kafka
-    container_name: kafka3
-    ports:
-      - "19095:19095"
-      - "29095:29095"
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 3
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:19095,PLAINTEXT_HOST://0.0.0.0:29095
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:19095,PLAINTEXT_HOST://localhost:29095
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    volumes:
-      - kafka3_data:/data
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
-    container_name: elasticsearch
-    ports:
-      - "9200:9200"
-    environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=false
-      - xpack.security.transport.ssl.enabled=false
-      - bootstrap.memory_lock=true
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-
-volumes:
-  mysql_data:
-  mongo_data:
-  zookeeper_data:
-  kafka1_data:
-  kafka2_data:
-  kafka3_data:
-  elasticsearch_data:
+      - redis-master
+      - redis-2
+      - redis-3
+      - redis-4
+      - redis-5
+      - redis-6
+    command: >
+      bash -c "sleep 5 &&
+               redis-cli --cluster create redis-master:6379 redis-2:6379 redis-3:6379 redis-4:6379 redis-5:6379 redis-6:6379 --cluster-replicas 1 --cluster-yes"
+    networks:
+      - yt-net
