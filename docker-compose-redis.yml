@@ -1,6 +1,6 @@
 
 services:
-  redis-master:
+  redis-1:
     image: redis:7.0
     deploy:
       resources:
