@@ -38,16 +38,7 @@ services:
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
 
-  redis:
-    image: redis:7
-    container_name: redis
-    ports:
-      - "6390:6379"
-    volumes:
-      - redis_data:/data
-
 volumes:
   mysql_data:
   mongo_data:
   elasticsearch_data:
-  redis_data:
