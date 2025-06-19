@@ -64,21 +64,6 @@ services:
     networks:
       - kafka-net
 
-  akhq:
-    image: tchiotludo/akhq:latest
-    container_name: akhq
-    ports:
-      - "8080:8080"
-    environment:
-      AKHQ_CONFIGURATION: |
-        akhq:
-          connections:
-            kafka-cluster:
-              properties:
-                bootstrap.servers: kafka1:9092,kafka2:9092,kafka3:9092
-    networks:
-      - kafka-net
-
 volumes:
   kafka1_data:
   kafka2_data:
