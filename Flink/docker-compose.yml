@@ -8,10 +8,9 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"
     volumes:
       - flink_data:/flink-data
-      - ./libs:/opt/flink/lib  # Optional: for JDBC connector JAR
 
   taskmanager:
     image: flink:1.19.0-scala_2.12
@@ -20,10 +19,9 @@ services:
     depends_on:
       - jobmanager
     environment:
-      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+      FLINK_PROPERTIES: "jobmanager.rpc.address: jobmanager"
     volumes:
       - flink_data:/flink-data
-      - ./libs:/opt/flink/lib
 
 volumes:
   flink_data:
