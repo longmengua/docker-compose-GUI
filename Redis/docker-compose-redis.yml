@@ -1,17 +1,17 @@
 
 services:
 
-  redisinsight:
-    image: redislabs/redisinsight:latest
-    container_name: redisinsight
-    ports:
-      - "5540:5540"
+  # redisinsight:
+  #   image: redislabs/redisinsight:latest
+  #   container_name: redisinsight
+  #   ports:
+  #     - "5540:5540"
 
-  redis-signle:
-    image: redis:7.0
-    container_name: redis-signle
-    ports:
-      - "6390:6379"
+  # redis-signle:
+  #   image: redis:7.0
+  #   container_name: redis-signle
+  #   ports:
+  #     - "6390:6379"
 
   redis-1:
     image: redis:7.0
@@ -23,7 +23,7 @@ services:
         reservations:
           cpus: '0.1'
           memory: 32M
-    container_name: redis-master
+    container_name: redis-1
     command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000
     ports:
       - "6379:6379"
