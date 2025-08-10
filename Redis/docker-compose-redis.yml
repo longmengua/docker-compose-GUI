@@ -125,8 +125,8 @@ services:
       # - redis-4
       # - redis-5
       # - redis-6
-    # command: bash -c "sleep 5 && redis-cli --cluster create redis-master:6379 redis-2:6379 redis-3:6379 redis-4:6379 redis-5:6379 redis-6:6379 --cluster-replicas 1 --cluster-yes"
-    command: bash -c "sleep 5 && redis-cli --cluster create redis-master:6379 redis-2:6379 redis-3:6379 --cluster-replicas 0 --cluster-yes"
+    # command: bash -c "sleep 5 && redis-cli --cluster create redis-1:6379 redis-2:6379 redis-3:6379 redis-4:6379 redis-5:6379 redis-6:6379 --cluster-replicas 1 --cluster-yes"
+    command: bash -c "sleep 5 && redis-cli --cluster create redis-1:6379 redis-2:6379 redis-3:6379 --cluster-replicas 0 --cluster-yes"
     networks:
       - yt-net
 
