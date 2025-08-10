@@ -7,9 +7,9 @@ services:
   #   ports:
   #     - "5540:5540"
 
-  redis-signle:
+  redis-single:
     image: redis:7.0
-    container_name: redis-signle
+    container_name: redis-single
     ports:
       - "6390:6379"
 
