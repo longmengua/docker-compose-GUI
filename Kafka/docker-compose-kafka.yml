@@ -75,19 +75,20 @@ services:
     container_name: single-kafka
     hostname: single-kafka
     ports:
-      - "19095:9092"
+      - "9092:9092"  # 對外開放 9092
     environment:
       KAFKA_ENABLE_KRAFT: "yes"
-      KAFKA_KRAFT_CLUSTER_ID: "oU-3kfkGQyKz2hP2uj9tOg" # 新的獨立 Cluster ID
+      KAFKA_KRAFT_CLUSTER_ID: "oU-3kfkGQyKz2hP2uj9tOg"
       KAFKA_CFG_NODE_ID: "4"
       KAFKA_CFG_PROCESS_ROLES: "controller,broker"
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: "4@single-kafka:9093"
       KAFKA_CFG_LISTENERS: "PLAINTEXT://0.0.0.0:9092,INTERNAL://0.0.0.0:9094,CONTROLLER://0.0.0.0:9093"
-      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:19095,INTERNAL://single-kafka:9094"
+      KAFKA_CFG_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:9092,INTERNAL://single-kafka:9094"
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: "INTERNAL"
       KAFKA_CFG_LOG_DIRS: "/bitnami/kafka/data"
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
     volumes:
       - single_kafka_data:/bitnami/kafka
     networks:
